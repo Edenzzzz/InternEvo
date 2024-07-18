@@ -4,17 +4,11 @@
 - GPU with Ampere or Hopper architecture (such as H100, A100)
 - Linux OS
 
-### Install through pip
+### Install through pip (Recommended)
 It is recommended to build a Python-3.10 virtual environment using conda, command is as follows:
 ```bash
 conda create --name internevo python=3.10 -y
 conda activate internevo
-```
-
-First, install the specified versions of torch, torchvision, torchaudio, and torch-scatter:
-```bash
-pip install --extra-index-url https://download.pytorch.org/whl/cu118 torch==2.1.0+cu118 torchvision==0.16.0+cu118 torchaudio==2.1.0+cu118
-pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 ```
 
 Install InternEvo:
@@ -22,9 +16,10 @@ Install InternEvo:
 pip install InternEvo
 ```
 
-Install flash-attention (version v2.2.1):
+Install torch-scatter:
+torch-scatter is an optional package; If you choose to install it, command is as follows:
 ```bash
-pip install flash-attn==2.2.1
+pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 ```
 
 Install Apex (version 23.05):
@@ -61,11 +56,10 @@ It is recommended to build a Python-3.10 virtual environment using conda and ins
 conda create --name internevo python=3.10 -y
 conda activate internevo
 cd InternEvo
-pip install -r requirements/torch.txt
-pip install -r requirements/runtime.txt
+pip install -r requirements/requirements.txt
 ```
 
-Install flash-attention (version v2.2.1):
+Install flash-attention (version v2.6.1):
 ```bash
 cd ./third_party/flash-attention
 python setup.py install

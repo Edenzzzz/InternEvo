@@ -4,17 +4,11 @@
 - Ampere或者Hopper架构的GPU (例如H100, A100)
 - Linux OS
 
-### pip方式安装
+### pip方式安装（推荐）
 推荐使用 conda 构建一个 Python-3.10 的虚拟环境，命令如下：
 ```bash
 conda create --name internevo-env python=3.10 -y
 conda activate internevo-env
-```
-
-首先，安装指定版本的torch, torchvision, torchaudio以及torch-scatter:
-```bash
-pip install --extra-index-url https://download.pytorch.org/whl/cu118 torch==2.1.0+cu118 torchvision==0.16.0+cu118 torchaudio==2.1.0+cu118
-pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 ```
 
 安装InternEvo:
@@ -22,9 +16,10 @@ pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 pip install InternEvo
 ```
 
-安装 flash-attention (version v2.2.1)：
+安装torch-scatter：
+torch-scatter为非必须安装包，如果安装，命令如下：
 ```bash
-pip install flash-attn==2.2.1
+pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 ```
 
 安装 Apex (version 23.05)：
@@ -61,11 +56,10 @@ git clone git@github.com:InternLM/InternEvo.git --recurse-submodules
 conda create --name internevo-env python=3.10 -y
 conda activate internevo-env
 cd InternEvo
-pip install -r requirements/torch.txt
-pip install -r requirements/runtime.txt
+pip install -r requirements/requirements.txt
 ```
 
-安装 flash-attention (version v2.2.1)：
+安装 flash-attention (version v2.6.1)：
 ```bash
 cd ./third_party/flash-attention
 python setup.py install
