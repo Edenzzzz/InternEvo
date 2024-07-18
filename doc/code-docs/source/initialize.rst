@@ -93,18 +93,18 @@ InternEvo 在配置文件中使用字段 ``model_type`` 和 ``model`` 来控制�
 优化器初始化
 -------------------------
 
-.. autofunction:: internlm.train.initialize_optimizer
+.. autofunction:: internlm.train.pipeline.initialize_optimizer
 
 .. _InternLM-dl-init:
 
 数据加载器初始化
 -------------------------
 
-.. autofunction:: internlm.train.get_train_data_loader
+.. autofunction:: internlm.data.build_train_loader_with_data_type
 
-.. _InternLM-trainer-init:
+.. _InternLM-trainerbuilder-init:
 
-Trainer 初始化
+TrainerBuilder 初始化
 -------------------------
 
-.. autofunction:: internlm.initialize.initialize_trainer
+.. autofunction:: internlm.core.trainer_builder.TrainerBuilder
