@@ -1,4 +1,3 @@
-# runtime
 packaging
 ninja
 numpy
@@ -10,23 +9,13 @@ sentencepiece
 boto3
 botocore
 py-libnuma
-
-# torch
-torch==2.1.0
-torchvision==0.16.0
-torchaudio==2.1.0
---extra-index-url https://download.pytorch.org/whl/cu118
-
+torch
 torch-scatter
 -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
-
-# util
 pre-commit
 pyecharts
 psutil
 gputil
 pynvml
 tensorboard
-
-# test
 pytest
