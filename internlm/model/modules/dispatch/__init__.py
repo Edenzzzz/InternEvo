@@ -1,34 +1,23 @@
 # adapted from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/__init__.py
 
 # Copyright (c) OpenMMLab. All rights reserved.
-import os
 import types
+import transformers
 
 from packaging.version import Version
-
-import transformers
 from transformers.utils.import_utils import is_flash_attn_2_available
 
-from .misc import LazyObject
+from internlm.model.modules.dispatch.utils import LazyObject
 
-USE_TRITON_KERNEL = bool(os.getenv("USE_TRITON_KERNEL", default="0"))
-SUPPORT_TRITON = False
 try:
     import triton  # pre-check # noqa: F401
     import triton.language as tl  # pre-check # noqa: F401
-
-    SUPPORT_TRITON = True
 except ImportError:
-    if USE_TRITON_KERNEL:
-        raise RuntimeError(
-            "USE_TRITON_KERNEL is set to 1, but triton has not been installed."
-            " Run `pip install triton==2.1.0` to install triton."
-        )
-
+    raise ImportError("triton is not installed.")
 
 SUPPORT_FLASH2 = is_flash_attn_2_available()
-TRANSFORMERS_VERSION = Version(transformers.__version__)
 
+TRANSFORMERS_VERSION = Version(transformers.__version__)
 
 LOWEST_TRANSFORMERS_VERSION = dict(
     InternLMForCausalLM=Version("4.36"),
@@ -46,9 +35,7 @@ RMS_DISPATCH_MAPPING = dict(
     InternLMRMSNorm=LazyObject("internlm.model.modules.dispatch.triton_kernels", "rms_norm_forward"),
 )
 
-ROTE_DISPATCH_MAPPING = dict(
-    InternLMRotaryEmbedding=LazyObject("internlm.model.modules.dispatch.internlm", "InternLMRotaryEmbedding"),
-)
+ROTE_DISPATCH_MAPPING = dict()
 
 
 def dispatch_attn_forward(model):
@@ -83,9 +70,6 @@ def dispatch_varlen_attn_forward(model):
 
 def dispatch_rmsnorm_forward(model):
 
-    if (not SUPPORT_TRITON) or (not USE_TRITON_KERNEL):
-        return
-
     rms_forward = None
     for module in model.modules():
         name = type(module).__name__
@@ -97,6 +81,7 @@ def dispatch_rmsnorm_forward(model):
 
 
 def replace_rote(model):
+
     def traverse(module):
         for name, child in module.named_children():
             cls_name = type(child).__name__
@@ -118,6 +103,7 @@ def replace_rote(model):
 
 
 def dispatch_modules(model, use_packed_dataset):
+
     def check(model_name):
         assert "ForCausalLM" in model_name
         msg = "{} requires transformers version at least {}, but got {}"

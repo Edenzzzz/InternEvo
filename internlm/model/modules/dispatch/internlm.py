@@ -1,67 +1,31 @@
 # adapted from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/internlm.py
 
 # Copyright (c) OpenMMLab. All rights reserved.
-from typing import Optional, Tuple
-
 import torch
 import torch.nn.functional as F
 
+from typing import Optional, Tuple
+
 from internlm.core.context import ParallelMode
 from internlm.core.context import global_context as gpc
-
-from .triton_kernels import apply_rotary_emb
+from internlm.model.modules.dispatch.triton_kernels import apply_rotary_emb
 
 SUPPORT_FLASH2 = False
-
 try:
     from flash_attn import flash_attn_func, flash_attn_varlen_func
-
     SUPPORT_FLASH2 = True
 except ImportError:
     pass
 
 
-class InternLMRotaryEmbedding(torch.nn.Module):
-    """
-    InternLMRotaryEmbedding implementation
-    """
-
-    def __init__(self, dim, max_position_embeddings=2048, base=10000, device=None):
-        super().__init__()
-        self.inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2).float().to(device) / dim))
-
-        # Build here to make `torch.jit.trace` work.
-        self.max_seq_len_cached = max_position_embeddings
-        t = torch.arange(self.max_seq_len_cached, device=self.inv_freq.device, dtype=self.inv_freq.dtype)
-        freqs = torch.einsum("i,j->ij", t, self.inv_freq)
-        emb = torch.cat((freqs, freqs), dim=-1)
-        self.cos_cached = emb.cos()
-        self.sin_cached = emb.sin()
-
-    def forward(self, x, seq_len):
-        # x: [bs, num_attention_heads, seq_len, head_size]
-        if seq_len > self.max_seq_len_cached or self.cos_cached.device != x.device or self.cos_cached.dtype != x.dtype:
-            self.max_seq_len_cached = seq_len
-            assert self.inv_freq.dtype == torch.float32
-            t = torch.arange(self.max_seq_len_cached, device=x.device, dtype=self.inv_freq.dtype)
-            freqs = torch.einsum("i,j->ij", t, self.inv_freq.to(t.device))
-            emb = torch.cat((freqs, freqs), dim=-1).to(x.device)
-            self.cos_cached = emb.cos().to(x.dtype)
-            self.sin_cached = emb.sin().to(x.dtype)
-        return (
-            self.cos_cached[:seq_len, ...],
-            self.sin_cached[:seq_len, ...],
-        )
-
-
-def rotate_half(x):
-    """Rotates half the hidden dims of the input."""
-    x1 = x[..., : x.shape[-1] // 2]
-    x2 = x[..., x.shape[-1] // 2 :]
-    return torch.cat((-x2, x1), dim=-1)
-
-
 def apply_rotary_pos_emb(q, k, cos, sin, position_ids):
+
+    def rotate_half(x):
+        """Rotates half the hidden dims of the input."""
+        x1 = x[..., : x.shape[-1] // 2]
+        x2 = x[..., x.shape[-1] // 2 :]
+        return torch.cat((-x2, x1), dim=-1)
+    
     cos = cos[position_ids].unsqueeze(1)  # [bs, 1, seq_len, dim]
     sin = sin[position_ids].unsqueeze(1)  # [bs, 1, seq_len, dim]
     q_embed = (q * cos) + (rotate_half(q) * sin)
