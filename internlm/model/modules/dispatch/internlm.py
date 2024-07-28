@@ -1,10 +1,10 @@
 # adapted from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/internlm.py
 
 # Copyright (c) OpenMMLab. All rights reserved.
+from typing import Optional, Tuple
+
 import torch
 import torch.nn.functional as F
-
-from typing import Optional, Tuple
 
 from internlm.core.context import ParallelMode
 from internlm.core.context import global_context as gpc
@@ -13,19 +13,19 @@ from internlm.model.modules.dispatch.triton_kernels import apply_rotary_emb
 SUPPORT_FLASH2 = False
 try:
     from flash_attn import flash_attn_func, flash_attn_varlen_func
+
     SUPPORT_FLASH2 = True
 except ImportError:
     pass
 
 
 def apply_rotary_pos_emb(q, k, cos, sin, position_ids):
-
     def rotate_half(x):
         """Rotates half the hidden dims of the input."""
         x1 = x[..., : x.shape[-1] // 2]
         x2 = x[..., x.shape[-1] // 2 :]
         return torch.cat((-x2, x1), dim=-1)
-    
+
     cos = cos[position_ids].unsqueeze(1)  # [bs, 1, seq_len, dim]
     sin = sin[position_ids].unsqueeze(1)  # [bs, 1, seq_len, dim]
     q_embed = (q * cos) + (rotate_half(q) * sin)

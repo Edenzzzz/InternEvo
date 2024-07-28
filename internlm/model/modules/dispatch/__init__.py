@@ -2,13 +2,13 @@
 
 # Copyright (c) OpenMMLab. All rights reserved.
 import types
-import transformers
 
 from packaging.version import Version
-from transformers.utils.import_utils import is_flash_attn_2_available
 
+import transformers
 from internlm.model.modules.dispatch.utils import LazyObject
 from internlm.utils.parallel import is_using_isp
+from transformers.utils.import_utils import is_flash_attn_2_available
 
 try:
     import triton  # pre-check # noqa: F401
@@ -36,9 +36,7 @@ RMS_DISPATCH_MAPPING = dict(
     InternLMRMSNorm=LazyObject("internlm.model.modules.dispatch.triton_kernels", "rms_norm_forward"),
 )
 
-ROTE_DISPATCH_MAPPING = dict(
-    
-)
+ROTE_DISPATCH_MAPPING = dict()
 
 EMBED_DISPATCH_MAPPING = dict(
     Embedding=LazyObject("internlm.model.modules.embedding", "Embedding1D"),
@@ -103,7 +101,6 @@ def dispatch_rmsnorm_forward(model):
 
 
 def replace_rote(model):
-
     def traverse(module):
         for name, child in module.named_children():
             cls_name = type(child).__name__
@@ -125,14 +122,17 @@ def replace_rote(model):
 
 
 def replace_embed(model):
-
     def traverse(module):
         for name, child in module.named_children():
             cls_name = type(child).__name__
             if cls_name in EMBED_DISPATCH_MAPPING:
                 embed = EMBED_DISPATCH_MAPPING[cls_name]
                 embed = embed.build()
-                child_new = embed(num_embeddings=child.num_embeddings, embedding_dim=child.embedding_dim, padding_idx=child.padding_idx).to(device=child.weight.device, dtype=child.weight.dtype)
+                child_new = embed(
+                    num_embeddings=child.num_embeddings,
+                    embedding_dim=child.embedding_dim,
+                    padding_idx=child.padding_idx,
+                ).to(device=child.weight.device, dtype=child.weight.dtype)
                 setattr(module, name, child_new)
             else:
                 traverse(child)
@@ -141,14 +141,18 @@ def replace_embed(model):
 
 
 def replace_linear(model):
-
     def traverse(module):
         for name, child in module.named_children():
             cls_name = type(child).__name__
             if cls_name in LINEAR_DISPATCH_MAPPING:
                 linear = LINEAR_DISPATCH_MAPPING[cls_name]
                 linear = linear.build()
-                child_new = linear(name=LINEAR2NEW_LINEAR_NAME_MAPPING[name], in_features=child.in_features, out_features=child.out_features, bias=child.bias is not None).to(device=child.weight.device, dtype=child.weight.dtype)
+                child_new = linear(
+                    name=LINEAR2NEW_LINEAR_NAME_MAPPING[name],
+                    in_features=child.in_features,
+                    out_features=child.out_features,
+                    bias=child.bias is not None,
+                ).to(device=child.weight.device, dtype=child.weight.dtype)
                 setattr(module, name, child_new)
             else:
                 traverse(child)
@@ -157,7 +161,6 @@ def replace_linear(model):
 
 
 def dispatch_modules(model, use_packed_dataset):
-
     def check(model_name):
         assert "ForCausalLM" in model_name
         msg = "{} requires transformers version at least {}, but got {}"
@@ -167,16 +170,16 @@ def dispatch_modules(model, use_packed_dataset):
             )
 
     check(type(model).__name__)
-    
+
     if use_packed_dataset:
         dispatch_varlen_attn_forward(model)
     else:
         dispatch_attn_forward(model)
-    
+
     dispatch_rmsnorm_forward(model)
-    
+
     replace_rote(model)
-    
+
     if is_using_isp():
         replace_embed(model)
         replace_linear(model)
