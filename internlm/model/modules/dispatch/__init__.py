@@ -8,6 +8,7 @@ from packaging.version import Version
 from transformers.utils.import_utils import is_flash_attn_2_available
 
 from internlm.model.modules.dispatch.utils import LazyObject
+from internlm.utils.parallel import is_using_isp
 
 try:
     import triton  # pre-check # noqa: F401
@@ -35,7 +36,28 @@ RMS_DISPATCH_MAPPING = dict(
     InternLMRMSNorm=LazyObject("internlm.model.modules.dispatch.triton_kernels", "rms_norm_forward"),
 )
 
-ROTE_DISPATCH_MAPPING = dict()
+ROTE_DISPATCH_MAPPING = dict(
+    
+)
+
+EMBED_DISPATCH_MAPPING = dict(
+    Embedding=LazyObject("internlm.model.modules.embedding", "Embedding1D"),
+)
+
+LINEAR_DISPATCH_MAPPING = dict(
+    Linear=LazyObject("internlm.model.modules.linear", "new_linear"),
+)
+
+LINEAR2NEW_LINEAR_NAME_MAPPING = dict(
+    q_proj="wq",
+    k_proj="wk",
+    v_proj="wv",
+    o_proj="wo",
+    gate_proj="w1",
+    down_proj="w2",
+    up_proj="w3",
+    lm_head="head",
+)
 
 
 def dispatch_attn_forward(model):
@@ -102,6 +124,38 @@ def replace_rote(model):
     traverse(model)
 
 
+def replace_embed(model):
+
+    def traverse(module):
+        for name, child in module.named_children():
+            cls_name = type(child).__name__
+            if cls_name in EMBED_DISPATCH_MAPPING:
+                embed = EMBED_DISPATCH_MAPPING[cls_name]
+                embed = embed.build()
+                child_new = embed(num_embeddings=child.num_embeddings, embedding_dim=child.embedding_dim, padding_idx=child.padding_idx).to(device=child.weight.device, dtype=child.weight.dtype)
+                setattr(module, name, child_new)
+            else:
+                traverse(child)
+
+    traverse(model)
+
+
+def replace_linear(model):
+
+    def traverse(module):
+        for name, child in module.named_children():
+            cls_name = type(child).__name__
+            if cls_name in LINEAR_DISPATCH_MAPPING:
+                linear = LINEAR_DISPATCH_MAPPING[cls_name]
+                linear = linear.build()
+                child_new = linear(name=LINEAR2NEW_LINEAR_NAME_MAPPING[name], in_features=child.in_features, out_features=child.out_features, bias=child.bias is not None).to(device=child.weight.device, dtype=child.weight.dtype)
+                setattr(module, name, child_new)
+            else:
+                traverse(child)
+
+    traverse(model)
+
+
 def dispatch_modules(model, use_packed_dataset):
 
     def check(model_name):
@@ -113,12 +167,19 @@ def dispatch_modules(model, use_packed_dataset):
             )
 
     check(type(model).__name__)
+    
     if use_packed_dataset:
         dispatch_varlen_attn_forward(model)
     else:
         dispatch_attn_forward(model)
+    
     dispatch_rmsnorm_forward(model)
+    
     replace_rote(model)
+    
+    if is_using_isp():
+        replace_embed(model)
+        replace_linear(model)
 
 
 __all__ = ["dispatch_modules"]
