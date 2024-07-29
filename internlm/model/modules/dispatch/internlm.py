@@ -1,6 +1,5 @@
 # adapted from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/internlm.py
 
-# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Optional, Tuple
 
 import torch
@@ -8,7 +7,7 @@ import torch.nn.functional as F
 
 from internlm.core.context import ParallelMode
 from internlm.core.context import global_context as gpc
-from internlm.model.modules.dispatch.triton_kernels import apply_rotary_emb
+from internlm.model.ops.rotary_emb import apply_rotary_emb
 
 SUPPORT_FLASH2 = False
 try:
@@ -114,8 +113,15 @@ def internlm_varlen_attn_forward(
 
     if use_varlen_atten:
         cos, sin = self.rotary_emb(value_states, max_seqlen)
-        query_states = apply_rotary_emb(query_states, cos[position_ids].squeeze(0), sin[position_ids].squeeze(0))
-        key_states = apply_rotary_emb(key_states, cos[position_ids].squeeze(0), sin[position_ids].squeeze(0))
+        cos = cos[position_ids].squeeze(0)
+        sin = sin[position_ids].squeeze(0)
+        assert sin.shape == cos.shape, "cos and sin must have the same shape"
+        _, rotary_dim = cos.shape
+        rotary_dim_half = rotary_dim // 2
+        cos_half = cos[:q_len, :rotary_dim_half]
+        sin_half = sin[:q_len, :rotary_dim_half]
+        query_states = apply_rotary_emb(query_states, cos_half, sin_half)
+        key_states = apply_rotary_emb(key_states, cos_half, sin_half)
     else:
         query_states = query_states.transpose(1, 2)
         key_states = key_states.transpose(1, 2)

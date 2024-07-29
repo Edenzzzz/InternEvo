@@ -4,7 +4,6 @@ datasets
 numpy
 tqdm
 einops
-triton
 psutil
 packaging
 pre-commit
