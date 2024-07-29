@@ -6,10 +6,6 @@ from packaging.version import Version
 
 import transformers
 from internlm.model.modules.dispatch.utils import LazyObject
-from internlm.utils.parallel import is_using_isp
-from transformers.utils.import_utils import is_flash_attn_2_available
-
-SUPPORT_FLASH2 = is_flash_attn_2_available()
 
 TRANSFORMERS_VERSION = Version(transformers.__version__)
 
@@ -29,8 +25,18 @@ EMBED_REPLACE_MAPPING = dict(
     Embedding=LazyObject("internlm.model.modules.embedding", "Embedding1D"),
 )
 
+NORM_REPLACE_MAPPING = dict(
+    InternLMRMSNorm=LazyObject("internlm.model.modules.norm", "new_layer_norm"),
+)
+
 LINEAR_REPLACE_MAPPING = dict(
     Linear=LazyObject("internlm.model.modules.linear", "new_linear"),
+)
+
+NORM2NEW_NORM_NAME_MAPPING = dict(
+    input_layernorm="rmsnorm",
+    post_attention_layernorm="rmsnorm",
+    norm="rmsnorm",
 )
 
 LINEAR2NEW_LINEAR_NAME_MAPPING = dict(
@@ -46,10 +52,6 @@ LINEAR2NEW_LINEAR_NAME_MAPPING = dict(
 
 
 def dispatch_attn_forward(model):
-
-    if not SUPPORT_FLASH2:
-        return
-
     attn_forward = None
     for module in model.modules():
         name = type(module).__name__
@@ -61,10 +63,6 @@ def dispatch_attn_forward(model):
 
 
 def dispatch_varlen_attn_forward(model):
-
-    if not SUPPORT_FLASH2:
-        return
-
     varlen_attn_forward = None
     for module in model.modules():
         name = type(module).__name__
@@ -86,6 +84,25 @@ def replace_embed(model):
                     num_embeddings=child.num_embeddings,
                     embedding_dim=child.embedding_dim,
                     padding_idx=child.padding_idx,
+                ).to(device=child.weight.device, dtype=child.weight.dtype)
+                setattr(module, name, child_new)
+            else:
+                traverse(child)
+
+    traverse(model)
+
+
+def replace_norm(model):
+    def traverse(module):
+        for name, child in module.named_children():
+            cls_name = type(child).__name__
+            if cls_name in NORM_REPLACE_MAPPING:
+                norm = NORM_REPLACE_MAPPING[cls_name]
+                norm = norm.build()
+                child_new = norm(
+                    norm_type=NORM2NEW_NORM_NAME_MAPPING[name],
+                    normalized_shape=child.weight.shape,
+                    eps=child.variance_epsilon,
                 ).to(device=child.weight.device, dtype=child.weight.dtype)
                 setattr(module, name, child_new)
             else:
@@ -130,9 +147,11 @@ def dispatch_modules(model, use_packed_dataset):
     else:
         dispatch_attn_forward(model)
 
-    if is_using_isp():
-        replace_embed(model)
-        replace_linear(model)
+    replace_norm(model)
+
+    replace_embed(model)
+
+    replace_linear(model)
 
 
 __all__ = ["dispatch_modules"]
