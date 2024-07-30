@@ -297,7 +297,7 @@ class TrainerBuilder(Trainer):
                     train_state=self.train_state,
                     optimizer=self.optimizer,
                     beta2_scheduler=self.beta2_scheduler,
-                    trainer=self,
+                    engine=self.engine,
                     start_time=start_time,
                     very_begining_time=self.very_begining_time,
                     loss=loss,
