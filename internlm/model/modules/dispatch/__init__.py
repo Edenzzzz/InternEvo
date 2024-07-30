@@ -15,10 +15,12 @@ LOWEST_TRANSFORMERS_VERSION = dict(
 
 ATTN_DISPATCH_MAPPING = dict(
     InternLMAttention=LazyObject("internlm.model.modules.dispatch.internlm", "internlm_attn_forward"),
+    InternLM2Attention=LazyObject("internlm.model.modules.dispatch.internlm2", "internlm2_attn_forward"),
 )
 
 VARLEN_ATTN_DISPATCH_MAPPING = dict(
     InternLMAttention=LazyObject("internlm.model.modules.dispatch.internlm", "internlm_varlen_attn_forward"),
+    InternLM2Attention=LazyObject("internlm.model.modules.dispatch.internlm2", "internlm2_varlen_attn_forward"),
 )
 
 EMBED_REPLACE_MAPPING = dict(
@@ -27,6 +29,7 @@ EMBED_REPLACE_MAPPING = dict(
 
 NORM_REPLACE_MAPPING = dict(
     InternLMRMSNorm=LazyObject("internlm.model.modules.norm", "new_layer_norm"),
+    InternLM2RMSNorm=LazyObject("internlm.model.modules.norm", "new_layer_norm"),
 )
 
 LINEAR_REPLACE_MAPPING = dict(
@@ -37,6 +40,8 @@ NORM2NEW_NORM_NAME_MAPPING = dict(
     input_layernorm="rmsnorm",
     post_attention_layernorm="rmsnorm",
     norm="rmsnorm",
+    attention_norm="rmsnorm",
+    ffn_norm="rmsnorm",
 )
 
 LINEAR2NEW_LINEAR_NAME_MAPPING = dict(
@@ -51,6 +56,7 @@ LINEAR2NEW_LINEAR_NAME_MAPPING = dict(
 )
 
 
+# hack: dispatch forward for attn
 def dispatch_attn_forward(model):
     attn_forward = None
     for module in model.modules():
@@ -62,6 +68,7 @@ def dispatch_attn_forward(model):
             module.forward = types.MethodType(attn_forward, module)
 
 
+# hack: dispatch forward for varlen attn
 def dispatch_varlen_attn_forward(model):
     varlen_attn_forward = None
     for module in model.modules():
@@ -73,6 +80,7 @@ def dispatch_varlen_attn_forward(model):
             module.forward = types.MethodType(varlen_attn_forward, module)
 
 
+# hack: replace embedding
 def replace_embed(model):
     def traverse(module):
         for name, child in module.named_children():
@@ -92,6 +100,7 @@ def replace_embed(model):
     traverse(model)
 
 
+# hack: replace norm
 def replace_norm(model):
     def traverse(module):
         for name, child in module.named_children():
@@ -111,6 +120,7 @@ def replace_norm(model):
     traverse(model)
 
 
+# hack: replace linear
 def replace_linear(model):
     def traverse(module):
         for name, child in module.named_children():
@@ -119,7 +129,7 @@ def replace_linear(model):
                 linear = LINEAR_REPLACE_MAPPING[cls_name]
                 linear = linear.build()
                 child_new = linear(
-                    name=LINEAR2NEW_LINEAR_NAME_MAPPING[name],
+                    name=LINEAR2NEW_LINEAR_NAME_MAPPING.get(name, name),
                     in_features=child.in_features,
                     out_features=child.out_features,
                     bias=child.bias is not None,
@@ -131,6 +141,7 @@ def replace_linear(model):
     traverse(model)
 
 
+# unified hack API: dispatch and replace modules
 def dispatch_modules(model, use_packed_dataset):
     def check(model_name):
         assert "ForCausalLM" in model_name
@@ -147,9 +158,9 @@ def dispatch_modules(model, use_packed_dataset):
     else:
         dispatch_attn_forward(model)
 
-    replace_norm(model)
-
     replace_embed(model)
+
+    replace_norm(model)
 
     replace_linear(model)
 

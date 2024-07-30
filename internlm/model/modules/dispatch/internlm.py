@@ -7,6 +7,7 @@ import torch.nn.functional as F
 
 from internlm.core.context import ParallelMode
 from internlm.core.context import global_context as gpc
+from internlm.model.modules.dispatch.common import apply_rotary_pos_emb
 from internlm.model.ops.rotary_emb import apply_rotary_emb
 
 SUPPORT_FLASH2 = False
@@ -16,20 +17,6 @@ try:
     SUPPORT_FLASH2 = True
 except ImportError:
     pass
-
-
-def apply_rotary_pos_emb(q, k, cos, sin, position_ids):
-    def rotate_half(x):
-        """Rotates half the hidden dims of the input."""
-        x1 = x[..., : x.shape[-1] // 2]
-        x2 = x[..., x.shape[-1] // 2 :]
-        return torch.cat((-x2, x1), dim=-1)
-
-    cos = cos[position_ids].unsqueeze(1)  # [bs, 1, seq_len, dim]
-    sin = sin[position_ids].unsqueeze(1)  # [bs, 1, seq_len, dim]
-    q_embed = (q * cos) + (rotate_half(q) * sin)
-    k_embed = (k * cos) + (rotate_half(k) * sin)
-    return q_embed, k_embed
 
 
 def internlm_attn_forward(
@@ -141,11 +128,10 @@ def internlm_varlen_attn_forward(
 
     assert SUPPORT_FLASH2
     if use_varlen_atten:
-        q_unpad, k_unpad, v_unpad = query_states.flatten(0, 1), key_states.flatten(0, 1), value_states.flatten(0, 1)
         attn_output = flash_attn_varlen_func(
-            q_unpad,
-            k_unpad,
-            v_unpad,
+            query_states.flatten(0, 1),
+            key_states.flatten(0, 1),
+            value_states.flatten(0, 1),
             cu_seqlens,
             cu_seqlens,
             max_seqlen,
