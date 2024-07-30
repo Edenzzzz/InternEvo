@@ -11,6 +11,7 @@ TRANSFORMERS_VERSION = Version(transformers.__version__)
 
 LOWEST_TRANSFORMERS_VERSION = dict(
     InternLMForCausalLM=Version("4.36"),
+    InternLM2ForCausalLM=Version('4.36'),
 )
 
 ATTN_DISPATCH_MAPPING = dict(
