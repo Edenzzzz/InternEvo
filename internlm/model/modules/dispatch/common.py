@@ -1,6 +1,8 @@
 import torch
 
 
+# modified from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/internlm.py#L71
+# modified from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/internlm2.py#L23
 def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
     def rotate_half(x):
         """Rotates half the hidden dims of the input."""
@@ -19,6 +21,7 @@ def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
     return q_embed, k_embed
 
 
+# adapted from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/internlm2.py#L31
 def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
     """This is the equivalent of torch.repeat_interleave(x, dim=1,
     repeats=n_rep).
@@ -33,6 +36,7 @@ def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
     return hidden_states.reshape(batch, num_key_value_heads * n_rep, slen, head_dim)
 
 
+# adapted from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/internlm2.py#L49
 def repeat_kv_bshd(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
     """The hidden states go from (batch, seqlen, num_key_value_heads, head_dim)
     to (batch, seqlen, num_attention_heads, head_dim)"""
