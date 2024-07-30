@@ -8,7 +8,11 @@ from einops import rearrange
 
 from internlm.core.context import ParallelMode
 from internlm.core.context import global_context as gpc
-from internlm.model.modules.dispatch.common import apply_rotary_pos_emb
+from internlm.model.modules.dispatch.common import (
+    apply_rotary_pos_emb,
+    repeat_kv,
+    repeat_kv_bshd,
+)
 from transformers.cache_utils import Cache, StaticCache
 
 SUPPORT_FLASH2 = False
@@ -18,30 +22,6 @@ try:
     SUPPORT_FLASH2 = True
 except ImportError:
     pass
-
-
-def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
-    """This is the equivalent of torch.repeat_interleave(x, dim=1,
-    repeats=n_rep).
-
-    The hidden states go from (batch, num_key_value_heads, seqlen, head_dim) to
-    (batch, num_attention_heads, seqlen, head_dim)
-    """
-    batch, num_key_value_heads, slen, head_dim = hidden_states.shape
-    if n_rep == 1:
-        return hidden_states
-    hidden_states = hidden_states[:, :, None, :, :].expand(batch, num_key_value_heads, n_rep, slen, head_dim)
-    return hidden_states.reshape(batch, num_key_value_heads * n_rep, slen, head_dim)
-
-
-def repeat_kv_bshd(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
-    """The hidden states go from (batch, seqlen, num_key_value_heads, head_dim)
-    to (batch, seqlen, num_attention_heads, head_dim)"""
-    batch, slen, num_key_value_heads, head_dim = hidden_states.shape
-    if n_rep == 1:
-        return hidden_states
-    hidden_states = hidden_states[:, :, :, None, :].expand(batch, slen, num_key_value_heads, n_rep, head_dim)
-    return hidden_states.reshape(batch, slen, num_key_value_heads * n_rep, head_dim)
 
 
 def internlm2_attn_forward(
