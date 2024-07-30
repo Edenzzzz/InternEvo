@@ -62,8 +62,6 @@ def internlm2_attn_forward(
             "https://github.com/huggingface/transformers"
         )
 
-    output_attentions = False
-
     bsz, q_len, _ = hidden_states.size()
 
     qkv_states = self.wqkv(hidden_states)
