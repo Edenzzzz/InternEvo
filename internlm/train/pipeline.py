@@ -172,7 +172,7 @@ def initialize_model(pre_process_func: Optional[Callable] = None, post_process_f
 
     register_model_initializer()
 
-    model = create_model(model_type=gpc.config.model_type, **(gpc.config.model))
+    model = create_model(model_type=gpc.config.model_type)
 
     if post_process_func:
         post_process_func(pre_process_output)

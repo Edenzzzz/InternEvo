@@ -5,12 +5,19 @@ from torch import nn
 from internlm.core.context import ParallelMode
 from internlm.core.context import global_context as gpc
 from internlm.core.parallel.shard import pipeline_parallel_sharding_wrapper
-from internlm.model.modules.dispatch import dispatch_modules
-from internlm.model.registry import hf_config_initializer, model_initializer
+from internlm.model.modules.dispatch import dispatch_config, dispatch_model
+from internlm.model.registry import config_initializer, model_initializer
 from internlm.utils.common import get_current_device
 
 
-def create_model(model_type, *args, **kwargs) -> Union[nn.Module, List[nn.Module]]:
+def create_model(model_type) -> Union[nn.Module, List[nn.Module]]:
+
+    if model_type == "hf":
+        config = config_initializer.get_module(module_name=model_type)(return_dict=False)
+        dispatch_config(config)
+
+    kwargs = dict(gpc.config.model)
+
     num_layers = kwargs.pop("num_layers")
     num_chunks = kwargs.pop("num_chunks", 1)
 
@@ -26,18 +33,16 @@ def create_model(model_type, *args, **kwargs) -> Union[nn.Module, List[nn.Module
 
     if not gpc.is_using_parallel_mode(ParallelMode.PIPELINE):
         if model_type == "hf":
-            hf_config_builder = hf_config_initializer.get_module(module_name=model_type)
-            config = hf_config_builder(return_dict=False)
-            model = model_buidler(*args, config).to(kwargs["device"])
-            dispatch_modules(model, use_packed_dataset=gpc.config.data.get("use_packed_dataset"))
+            model = model_buidler(config).to(kwargs["device"])
+            dispatch_model(model, use_packed_dataset=gpc.config.data.get("use_packed_dataset"))
         else:
             kwargs["first"] = kwargs["last"] = True
             kwargs["start_layer_idx"] = 0
             kwargs["num_layers"] = num_layers
-            model = model_buidler(*args, **kwargs).to(kwargs["device"])
+            model = model_buidler(**kwargs).to(kwargs["device"])
         setattr(model, "first_layer", 0)
         setattr(model, "last_layer", num_layers)
     else:
-        model = pipeline_parallel_sharding_wrapper(num_layers, num_chunks, model_buidler, *args, **kwargs)
+        model = pipeline_parallel_sharding_wrapper(num_layers, num_chunks, model_buidler, **kwargs)
 
     return model

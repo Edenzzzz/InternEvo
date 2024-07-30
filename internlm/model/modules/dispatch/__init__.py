@@ -5,6 +5,7 @@ import types
 from packaging.version import Version
 
 import transformers
+from internlm.core.context import global_context as gpc
 from internlm.model.modules.dispatch.utils import LazyObject
 
 TRANSFORMERS_VERSION = Version(transformers.__version__)
@@ -142,8 +143,8 @@ def replace_linear(model):
     traverse(model)
 
 
-# unified hack API: dispatch and replace modules
-def dispatch_modules(model, use_packed_dataset):
+# unified hack API: dispatch model
+def dispatch_model(model, use_packed_dataset):
     def check(model_name):
         assert "ForCausalLM" in model_name
         msg = "{} requires transformers version at least {}, but got {}"
@@ -166,4 +167,17 @@ def dispatch_modules(model, use_packed_dataset):
     replace_linear(model)
 
 
-__all__ = ["dispatch_modules"]
+# unified hack API: dispatch config
+def dispatch_config(config):
+    gpc.config.model.vocab_size = gpc.config.VOCAB_SIZE = config.vocab_size
+    gpc.config.model.hidden_size = gpc.config.HIDDEN_SIZE = config.hidden_size
+    gpc.config.model.num_layers = gpc.config.NUM_LAYER = config.num_hidden_layers
+    gpc.config.model.num_attention_heads = gpc.config.NUM_ATTENTION_HEAD = config.num_attention_heads
+    gpc.config.model.mlp_ratio = gpc.config.MLP_RATIO = config.intermediate_size / config.hidden_size
+
+    # For models that use GQA
+    if hasattr(config, "num_key_value_heads"):
+        gpc.config.model.num_kv_attention_heads = gpc.config.NUM_KV_ATTENTION_HEAD = config.num_key_value_heads
+
+
+__all__ = ["dispatch_model", "dispatch_config"]
