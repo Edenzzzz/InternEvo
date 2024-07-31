@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InternLM \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-31 11:46+0800\n"
+"POT-Creation-Date: 2024-07-31 13:55+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -38,6 +38,91 @@ msgstr ""
 " and track training status with "
 "``internlm.monitor.monitor.MonitorTracker``."
 
+#: internlm.monitor.monitor.initialize_monitor_manager:1 of
+msgid ""
+"Initialize monitor manager for monitoring training lifetime and alerting "
+"exception info to Feishu."
+msgstr ""
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook
+#: internlm.monitor.monitor.MonitorManager.start_monitor
+#: internlm.monitor.monitor.MonitorTracker
+#: internlm.monitor.monitor.initialize_monitor_manager of
+msgid "参数"
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.start_monitor:3
+#: internlm.monitor.monitor.initialize_monitor_manager:3 of
+msgid "The training job name."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.start_monitor:5
+#: internlm.monitor.monitor.initialize_monitor_manager:5 of
+msgid "The Feishu webhook address for sending alert messages."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager:1 of
+msgid ""
+"Monitor Manager for managing monitor thread and monitoring training "
+"status."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.monitor_loss_spike:1 of
+msgid "Check loss value, if loss spike occurs, send alert message to Feishu."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.monitor_exception:1 of
+msgid "Catch and format exception information, send alert message to Feishu."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.handle_sigterm:1 of
+msgid "Catch SIGTERM signal, and send alert message to Feishu."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.start_monitor:1 of
+msgid ""
+"Initialize and start monitor thread for checking training job status, "
+"loss spike and so on."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.start_monitor:7 of
+msgid "The time of monitor interval in seconds, defaults to 300."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.start_monitor:9 of
+msgid ""
+"The limit multiple of current loss to previous loss value, which means "
+"loss spike may be occurs, defaults to 1.5."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorManager.stop_monitor:1 of
+msgid "Stop the monitor and alert thread."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorTracker:1 of
+msgid "Track job status and alert to Feishu during job training."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorTracker:3 of
+msgid "The Feishu webhook address for sending alerting messages."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorTracker:5 of
+msgid "The interval in seconds for monitoring checks. Defaults to 300."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorTracker:7 of
+msgid "The threshold for detecting loss value spikes. Defaults to 1.5."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorTracker.run:1 of
+msgid "start the monitor tracker."
+msgstr ""
+
+#: internlm.monitor.monitor.MonitorTracker.stop:1 of
+msgid "Stop the monitor tracker."
+msgstr ""
+
 #: ../../source/monitor.rst:18
 msgid "告警"
 msgstr "Alerting"
@@ -54,6 +139,38 @@ msgstr ""
 "occurs, an alert will be triggered and a message will be sent to the "
 "Feishu webhook address by calling "
 "``internlm.monitor.alert.send_feishu_msg_with_webhook()``."
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook:1 of
+msgid "Use Feishu robot to send messages with the given webhook."
+msgstr ""
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook:3 of
+msgid "The webhook to be used to send message."
+msgstr ""
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook:5 of
+msgid "The message title."
+msgstr ""
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook:7 of
+msgid "The message body."
+msgstr ""
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook of
+msgid "返回"
+msgstr ""
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook:10 of
+msgid "The response from the request. Or catch the exception and return None."
+msgstr ""
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook of
+msgid "抛出"
+msgstr ""
+
+#: internlm.monitor.alert.send_feishu_msg_with_webhook:12 of
+msgid "An exception rasied by the HTTP post request."
+msgstr ""
 
 #: ../../source/monitor.rst:25
 msgid "轻量监控"
@@ -84,35 +201,33 @@ msgstr ""
 "<https://github.com/InternLM/InternEvo/blob/develop/configs/7B_sft.py>`_."
 " Here is an example of a monitoring configuration:"
 
-#: ../../source/monitor.rst:41
+#: ../../source/monitor.rst:46
 msgid "enable_feishu_alert (bool)：是否启用飞书告警。默认值：False。"
 msgstr "enable_feishu_alert: Whether to enable Feishu alerts. Defaults: False."
 
-#: ../../source/monitor.rst:42
+#: ../../source/monitor.rst:47
 msgid "feishu_alert_address (str)：飞书告警的 Webhook 地址。默认值：None。"
 msgstr ""
 "feishu_alert_address: The webhook address for Feishu alerts. Defaults: "
 "None."
 
-#: ../../source/monitor.rst:43
+#: ../../source/monitor.rst:48
 msgid "light_monitor_address (str)：轻量监控的地址。默认值：None。"
 msgstr ""
 "light_monitor_address: The address for lightweight monitoring. Defaults: "
 "None."
 
-#: ../../source/monitor.rst:45
+#: ../../source/monitor.rst:50
+#, fuzzy
 msgid ""
-"InternEvo 使用 ``internlm.monitor.alert.initialize_light_monitor`` "
-"来初始化轻量监控客户端。一旦初始化完成，它会建立与监控服务器的连接。在训练过程中，使用 "
-"``internlm.monitor.alert.send_heartbeat`` "
-"来发送不同类型的心跳信息至监控服务器。监控服务器会根据这些心跳信息来检测训练是否出现异常，并在需要时发送警报消息。"
+"InternEvo 使用 ``internlm.monitor.monitor.MonitorManager`` "
+"来初始化轻量监控客户端。一旦初始化完成，它会建立与监控服务器的连接。在训练过程中，发送不同类型的心跳信息至监控服务器。监控服务器会根据这些心跳信息来检测训练是否出现异常，并在需要时发送警报消息。"
 msgstr ""
-"InternEvo uses ``internlm.monitor.alert.initialize_light_monitor`` to "
+"InternEvo uses ``internlm.monitor.monitor.MonitorManager`` to "
 "initialize the lightweight monitoring client. Once initialization is "
 "complete, it establishes a connection with the monitoring server. During "
-"the training process, it uses ``internlm.monitor.alert.send_heartbeat`` "
-"to send various types of heartbeat messages to the monitoring server. The"
-" monitoring server uses these heartbeat messages to detect if the "
+"the training process, it sends various types of heartbeat messages to the monitoring server. "
+"The monitoring server uses these heartbeat messages to detect if the "
 "training encounters any abnormalities and sends alert messages as needed."
 
 #~ msgid ""

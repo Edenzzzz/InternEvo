@@ -52,7 +52,7 @@ Moe_loss_coeff项决定着负载平衡损失项将如何添加到最终的损失
 模型训练
 ----------------
 
-internlm.model.modeling_moe提供了一个标准的混合专家模型的实现，该模型的网络结构和图 :ref:`switch_transformer` 一致，其中使用到internlm.model.moe.MoE实现MoE网络。用户在配置文件中指定模型类型：
+internlm.model.modeling_moe提供了一个标准的混合专家模型的实现，该模型的网络结构和图 :ref:`switch_transformer` 一致，其中使用到internlm.model.moe.moe.MoE实现MoE网络。用户在配置文件中指定模型类型：
 
 .. code-block:: python
 
@@ -60,6 +60,6 @@ internlm.model.modeling_moe提供了一个标准的混合专家模型的实现�
 
 并配置好稀疏专家网络的相关参数后，就可以像正常启动InternEvo一样进行混合专家模型的分布式训练，具体请参考 :doc:`/usage` “启动训练”相关章节的内容。
 
-.. autoclass:: internlm.model.moe.MoE
+.. autoclass:: internlm.model.moe.moe.MoE
 
-注意：InternEvo支持用户定义自己的MoE结构。internlm.model.moe.MoE是定义MoE网络的接口，目前使用SwiGLU网络实现了专家模型并支持top1gating和top2gating两种门控策略。用户可以在MoE接口中对专家网络和门控策略进行扩展。
+注意：InternEvo支持用户定义自己的MoE结构。internlm.model.moe.moe.MoE是定义MoE网络的接口，目前使用SwiGLU网络实现了专家模型并支持top1gating和top2gating两种门控策略。用户可以在MoE接口中对专家网络和门控策略进行扩展。
