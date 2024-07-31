@@ -13,7 +13,12 @@ from internlm.utils.common import get_current_device
 def create_model(model_type) -> Union[nn.Module, List[nn.Module]]:
 
     if model_type == "hf":
-        config = config_initializer.get_module(module_name=model_type)(return_dict=False)
+        assert gpc.config.model.get("use_flash_attn", False), "Currently we only support attn_implementation=flash_attention_2 for hf models."
+        extra_kwargs = {
+            "return_dict": False,
+            "attn_implementation": "flash_attention_2"
+        }
+        config = config_initializer.get_module(module_name=model_type)(**extra_kwargs)
         dispatch_config(config)
 
     kwargs = dict(gpc.config.model)
@@ -34,7 +39,7 @@ def create_model(model_type) -> Union[nn.Module, List[nn.Module]]:
     if not gpc.is_using_parallel_mode(ParallelMode.PIPELINE):
         if model_type == "hf":
             model = model_buidler(config).to(kwargs["device"])
-            dispatch_model(model, use_packed_dataset=gpc.config.data.get("use_packed_dataset"))
+            dispatch_model(model)
         else:
             kwargs["first"] = kwargs["last"] = True
             kwargs["start_layer_idx"] = 0

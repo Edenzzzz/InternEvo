@@ -1,29 +1,8 @@
 # adapted from https://github.com/InternLM/xtuner/blob/main/xtuner/model/modules/dispatch/__init__.py
 
-import types
-
-from packaging.version import Version
-
-import transformers
 from internlm.core.context import global_context as gpc
 from internlm.model.modules.dispatch.utils import LazyObject
 
-TRANSFORMERS_VERSION = Version(transformers.__version__)
-
-LOWEST_TRANSFORMERS_VERSION = dict(
-    InternLMForCausalLM=Version("4.36"),
-    InternLM2ForCausalLM=Version("4.36"),
-)
-
-ATTN_DISPATCH_MAPPING = dict(
-    InternLMAttention=LazyObject("internlm.model.modules.dispatch.internlm", "internlm_attn_forward"),
-    InternLM2Attention=LazyObject("internlm.model.modules.dispatch.internlm2", "internlm2_attn_forward"),
-)
-
-VARLEN_ATTN_DISPATCH_MAPPING = dict(
-    InternLMAttention=LazyObject("internlm.model.modules.dispatch.internlm", "internlm_varlen_attn_forward"),
-    InternLM2Attention=LazyObject("internlm.model.modules.dispatch.internlm2", "internlm2_varlen_attn_forward"),
-)
 
 EMBED_REPLACE_MAPPING = dict(
     Embedding=LazyObject("internlm.model.modules.embedding", "Embedding1D"),
@@ -56,30 +35,6 @@ LINEAR2NEW_LINEAR_NAME_MAPPING = dict(
     up_proj="w3",
     lm_head="head",
 )
-
-
-# hack: dispatch forward for attn
-def dispatch_attn_forward(model):
-    attn_forward = None
-    for module in model.modules():
-        name = type(module).__name__
-        if name in ATTN_DISPATCH_MAPPING:
-            if attn_forward is None:
-                attn_forward = ATTN_DISPATCH_MAPPING[name]
-                attn_forward = attn_forward.build()
-            module.forward = types.MethodType(attn_forward, module)
-
-
-# hack: dispatch forward for varlen attn
-def dispatch_varlen_attn_forward(model):
-    varlen_attn_forward = None
-    for module in model.modules():
-        name = type(module).__name__
-        if name in VARLEN_ATTN_DISPATCH_MAPPING:
-            if varlen_attn_forward is None:
-                varlen_attn_forward = VARLEN_ATTN_DISPATCH_MAPPING[name]
-                varlen_attn_forward = varlen_attn_forward.build()
-            module.forward = types.MethodType(varlen_attn_forward, module)
 
 
 # hack: replace embedding
@@ -144,21 +99,7 @@ def replace_linear(model):
 
 
 # unified hack API: dispatch model
-def dispatch_model(model, use_packed_dataset):
-    def check(model_name):
-        assert "ForCausalLM" in model_name
-        msg = "{} requires transformers version at least {}, but got {}"
-        if model_name in LOWEST_TRANSFORMERS_VERSION:
-            assert TRANSFORMERS_VERSION >= LOWEST_TRANSFORMERS_VERSION[model_name], msg.format(
-                model_name, LOWEST_TRANSFORMERS_VERSION[model_name], TRANSFORMERS_VERSION
-            )
-
-    check(type(model).__name__)
-
-    if use_packed_dataset:
-        dispatch_varlen_attn_forward(model)
-    else:
-        dispatch_attn_forward(model)
+def dispatch_model(model):
 
     replace_embed(model)
 
