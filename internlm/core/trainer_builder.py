@@ -52,8 +52,8 @@ class TrainerBuilder(Trainer):
     `TrainerBuilder` extends the base `Trainer` class to include additional functionality
     for initializing and managing various components involved in the training process.
     This includes setting up logging, checkpoints, loss functions, optimizers, metrics,
-    and profiling tools. The class supports distributed training and allows for seamless
-    management of training, evaluation, and checkpointing.
+    train states, and profiling tools. The class supports distributed training and allows
+    for seamless management of training, evaluation, and checkpointing.
 
     Args:
         model (torch.nn.Module): The model to be trained.
@@ -62,7 +62,7 @@ class TrainerBuilder(Trainer):
         **kwargs: Additional keyword arguments including:
             - config (str): Path to the configuration file.
             - dataset_types (list): Types of datasets being used.
-            - profiling (bool): Whether to enable memory profiling.
+            - profiling (bool): Whether to enable profiling.
 
     Methods:
         __init__: Initializes the `TrainerBuilder` with the model, data loaders, and other components.
@@ -86,7 +86,7 @@ class TrainerBuilder(Trainer):
             **kwargs: Additional keyword arguments including:
                 - config (str): Path to the configuration file.
                 - dataset_types (list): Types of datasets being used.
-                - profiling (bool): Whether to enable memory profiling.
+                - profiling (bool): Whether to enable profiling.
 
         """
         # set very_beginning_time
@@ -231,6 +231,9 @@ class TrainerBuilder(Trainer):
         self.isp_communicator = isp_communicator
 
     def fit(self):
+        """
+        Run InternEvo training loop.
+        """
         self.train()
         train_iter = iter(self.train_dl)
 
@@ -309,7 +312,7 @@ class TrainerBuilder(Trainer):
                 )
         return success_update, grad_norm_groups
 
-    def _record_metrics(self, batch_count, batch, start_time, loss, moe_loss, success_update, grad_norm_groups):
+    def _record_metrics(self, batch_count: int, batch, start_time, loss, moe_loss, success_update, grad_norm_groups):
         get_tflops_func = partial(
             get_megatron_flops,
             checkpoint=gpc.config.model.checkpoint,
