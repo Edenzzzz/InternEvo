@@ -10,7 +10,7 @@ def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
         x2 = x[..., x.shape[-1] // 2 :]
         return torch.cat((-x2, x1), dim=-1)
 
-    if position_ids:
+    if position_ids is not None:
         cos = cos[position_ids]
         sin = sin[position_ids]
 
