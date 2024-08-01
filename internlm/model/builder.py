@@ -6,7 +6,7 @@ from internlm.core.context import ParallelMode
 from internlm.core.context import global_context as gpc
 from internlm.core.parallel.shard import pipeline_parallel_sharding_wrapper
 from internlm.model.modules.dispatch import dispatch_config, dispatch_model
-from internlm.model.registry import config_initializer, model_initializer
+from internlm.model.registry import hf_config_initializer, model_initializer
 from internlm.utils.common import get_current_device
 
 
@@ -18,7 +18,7 @@ def create_model(model_type) -> Union[nn.Module, List[nn.Module]]:
             "return_dict": False,
             "attn_implementation": "flash_attention_2"
         }
-        config = config_initializer.get_module(module_name=model_type)(**extra_kwargs)
+        config = hf_config_initializer.get_module(module_name=model_type)(**extra_kwargs)
         dispatch_config(config)
 
     kwargs = dict(gpc.config.model)
