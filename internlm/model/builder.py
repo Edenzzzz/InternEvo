@@ -13,9 +13,6 @@ from internlm.utils.common import get_current_device
 def create_model(model_type) -> Union[nn.Module, List[nn.Module]]:
 
     if model_type == "hf":
-        assert gpc.config.model.get(
-            "use_flash_attn", False
-        ), "Currently we only support attn_implementation=flash_attention_2 for hf models."
         extra_kwargs = {"return_dict": False, "attn_implementation": "flash_attention_2"}
         config = hf_config_initializer.get_module(module_name=model_type)(**extra_kwargs)
         convert_hf_config(config)
