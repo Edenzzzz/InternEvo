@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InternLM \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-31 13:55+0800\n"
+"POT-Creation-Date: 2024-07-31 11:45+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -127,15 +127,14 @@ msgid "模型训练"
 msgstr "Model Training"
 
 #: ../../source/moe.rst:55
-#, fuzzy
 msgid ""
 "internlm.model.modeling_moe提供了一个标准的混合专家模型的实现，该模型的网络结构和图 "
 ":ref:`switch_transformer` "
-"一致，其中使用到internlm.model.moe.moe.MoE实现MoE网络。用户在配置文件中指定模型类型："
+"一致，其中使用到internlm.model.moe.MoE实现MoE网络。用户在配置文件中指定模型类型："
 msgstr ""
 "internlm.model.modeling_moe provides an implementation of a standard MoE."
 " The model structure is consistent with Figure :ref:`switch_transformer` "
-", which uses internlm.model.moe.moe.MoE to implement the MoE network. To use "
+", which uses internlm.model.moe.MoE to implement the MoE network. To use "
 "moe model, specify the model type in the configuration file:"
 
 #: ../../source/moe.rst:61
@@ -147,83 +146,11 @@ msgstr ""
 "distributed training can start as the normal training process. please "
 "refer to :doc:`/usage`: Start Training"
 
-#: internlm.model.moe.moe.MoE:1 of
-msgid "Initialize an MoE layer."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE of
-#, fuzzy
-msgid "参数"
-msgstr "Parameter Settings"
-
-#: internlm.model.moe.moe.MoE:3 of
-msgid ""
-"the hidden dimension of the model, importantly this is also the input and"
-" output dimension."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:5 of
-msgid "default=1, the total number of experts per layer."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:7 of
-msgid "default=1, number of ranks in the expert parallel world or group."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:9 of
-msgid "default=1, top-k gating value, only supports k=1 or k=2."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:11 of
-msgid "default=1.0, the capacity of the expert at training time."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:13 of
-msgid "default=1.0, the capacity of the expert at eval time."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:15 of
-msgid ""
-"default=4, the minimum capacity per expert regardless of the "
-"capacity_factor."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:17 of
-msgid ""
-"default=None, noisy gate policy, valid options are 'Jitter', 'RSample' or"
-" 'None'."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:20 of
-msgid "default=True, whether to use the default MoE layer."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:22 of
-msgid ""
-"default=True, whether to drop tokens - (setting to False is equivalent to"
-" infinite capacity)."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:25 of
-msgid "default=True, whether to use Random Token Selection."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:27 of
-msgid ""
-"default=False, make this MoE layer a Residual MoE "
-"(https://arxiv.org/abs/2201.05596) layer."
-msgstr ""
-
-#: internlm.model.moe.moe.MoE:30 of
-msgid "default=None, the torch module that defines the residual MLP."
-msgstr ""
-
 #: ../../source/moe.rst:65
-#, fuzzy
-msgid "注意：InternEvo支持用户定义自己的MoE结构。internlm.model.moe.moe.MoE是定义MoE网络的接口，目前使用SwiGLU网络实现了专家模型并支持top1gating和top2gating两种门控策略。用户可以在MoE接口中对专家网络和门控策略进行扩展。"
+msgid "注意：InternEvo支持用户定义自己的MoE结构。internlm.model.moe.MoE是定义MoE网络的接口，目前使用SwiGLU网络实现了专家模型并支持top1gating和top2gating两种门控策略。用户可以在MoE接口中对专家网络和门控策略进行扩展。"
 msgstr ""
 "Note: InternEvo supports users to define their own MoE structure. "
-"internlm.model.moe.moe.MoE is the interface that defines the MoE network. "
+"internlm.model.moe.MoE is the interface that defines the MoE network. "
 "Currently, the SwiGLU network is used to implement the experts and "
 "supports two gating strategies: top1gating and top2gating. Users can "
 "extend the expert network and gating strategy in the MoE interface as "

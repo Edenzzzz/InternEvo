@@ -31,15 +31,10 @@ InternEvo轻量级监控工具采用心跳机制实时监测训练过程中的�
 .. code-block:: python
 
     monitor = dict(
-        # feishu alert configs
         alert=dict(
-            enable_feishu_alert=DO_ALERT,
-            feishu_alert_address=None,  # feishu webhook to send alert message
-            light_monitor_address=None,  # light_monitor address to send heartbeat
-            alert_file_path=f"llm_alter/{JOB_NAME}_alert.log",
-        ),
-        tensorboard=dict(
-            queue_max_length=10,
+            enable_feishu_alert=False,
+            feishu_alert_address=None,
+            light_monitor_address=None,
         ),
     )
 
@@ -47,7 +42,8 @@ InternEvo轻量级监控工具采用心跳机制实时监测训练过程中的�
 - feishu_alert_address (str)：飞书告警的 Webhook 地址。默认值：None。
 - light_monitor_address (str)：轻量监控的地址。默认值：None。
 
-InternEvo 使用 ``internlm.monitor.monitor.MonitorManager`` 来初始化轻量监控客户端。一旦初始化完成，它会建立与监控服务器的连接。在训练过程中，发送不同类型的心跳信息至监控服务器。监控服务器会根据这些心跳信息来检测训练是否出现异常，并在需要时发送警报消息。
+InternEvo 使用 ``internlm.monitor.alert.initialize_light_monitor`` 来初始化轻量监控客户端。一旦初始化完成，它会建立与监控服务器的连接。在训练过程中，使用 ``internlm.monitor.alert.send_heartbeat`` 来发送不同类型的心跳信息至监控服务器。监控服务器会根据这些心跳信息来检测训练是否出现异常，并在需要时发送警报消息。
 
-.. autoclass:: internlm.monitor.monitor.MonitorManager
+.. autofunction:: internlm.monitor.alert.initialize_light_monitor
 
+.. autofunction:: internlm.monitor.alert.send_heartbeat
