@@ -40,20 +40,22 @@ msgstr ""
 
 #: ../../../install.md:8
 msgid "pip方式安装"
-msgstr "Install through pip"
+msgstr ""
 
 #: ../../../install.md:9
 #, fuzzy
 msgid "推荐使用 conda 构建一个 Python-3.10 的虚拟环境，命令如下："
-msgstr "It is recommended to build a Python-3.10 virtual environment using conda, command is as follows:"
+msgstr ""
+"It is recommended to build a Python-3.10 virtual environment using conda "
+"and install the required dependencies based on the `requirements/` files:"
 
 #: ../../../install.md:15
 msgid "首先，安装指定版本的torch, torchvision, torchaudio以及torch-scatter:"
-msgstr "First, install the specified versions of torch, torchvision, torchaudio, and torch-scatter:"
+msgstr ""
 
 #: ../../../install.md:21
 msgid "安装InternEvo:"
-msgstr "Install InternEvo:"
+msgstr ""
 
 #: ../../../install.md:26 ../../../install.md:69
 #, fuzzy
@@ -67,11 +69,11 @@ msgstr "Install Apex (version 23.05):"
 
 #: ../../../install.md:34
 msgid "源码方式安装"
-msgstr "Install through source code"
+msgstr ""
 
 #: ../../../install.md:35
 msgid "依赖包"
-msgstr "Required Packages"
+msgstr ""
 
 #: ../../../install.md:36
 msgid "首先，需要安装的依赖包及对应版本列表如下："
@@ -99,20 +101,26 @@ msgstr ""
 
 #: ../../../install.md:43
 msgid "以上依赖包安装完成后，需要更新配置系统环境变量："
-msgstr "After installing the above dependencies, some system environment variables need to be updated:"
+msgstr ""
+"After installing the above dependencies, some system environment "
+"variables need to be updated:"
 
 #: ../../../install.md:54
 msgid "安装过程"
-msgstr "Install Procedure"
+msgstr ""
 
 #: ../../../install.md:55
 #, fuzzy
 msgid "将项目`InternEvo`及其依赖子模块，从 github 仓库中 clone 下来，命令如下："
-msgstr "Clone the project `InternEvo` and its dependent submodules from the github repository, as follows:"
+msgstr ""
+"Clone the project `internlm` and its dependent submodules from the github"
+" repository, as follows:"
 
 #: ../../../install.md:60
 msgid "推荐使用 conda 构建一个 Python-3.10 的虚拟环境， 并基于`requirements/`文件安装项目所需的依赖包："
-msgstr "It is recommended to build a Python-3.10 virtual environment using conda and install the required dependencies based on the `requirements/` files:"
+msgstr ""
+"It is recommended to build a Python-3.10 virtual environment using conda "
+"and install the required dependencies based on the `requirements/` files:"
 
 #: ../../../install.md:79
 msgid "安装 Apex (version 23.05)："
@@ -120,7 +128,7 @@ msgstr "Install Apex (version 23.05):"
 
 #: ../../../install.md:89
 msgid "额外安装"
-msgstr "Additional Installation"
+msgstr ""
 
 #: ../../../install.md:94
 msgid "环境镜像"
@@ -131,7 +139,10 @@ msgstr "Environment Image"
 msgid ""
 "用户可以使用提供的 dockerfile 结合 docker.Makefile 来构建自己的镜像，或者也可以从 "
 "https://hub.docker.com/r/internlm/internevo/tags 获取安装了 InternEvo 运行环境的镜像。"
-msgstr "Users can use the provided dockerfile combined with docker.Makefile to build their own images, or obtain images with InternEvo runtime environment installed from https://hub.docker.com/r/internlm/internevo/tags."
+msgstr ""
+"Users can use the provided dockerfile combined with docker.Makefile to "
+"build their own images, or obtain images with InternEvo runtime "
+"environment installed from https://hub.docker.com/r/internlm/internlm."
 
 #: ../../../install.md:97
 msgid "镜像配置及构造"
@@ -141,7 +152,10 @@ msgstr "Image Configuration and Build"
 msgid ""
 "dockerfile 的配置以及构造均通过 docker.Makefile 文件实现，在 InternEvo 根目录下执行如下命令即可 build"
 " 镜像："
-msgstr "The configuration and build of the Dockerfile are implemented through the docker.Makefile. To build the image, execute the following command in the root directory of InternEvo:"
+msgstr ""
+"The configuration and build of the Dockerfile are implemented through the"
+" docker.Makefile. To build the image, execute the following command in "
+"the root directory of InternEvo:"
 
 #: ../../../install.md:102
 #, fuzzy
@@ -176,7 +190,7 @@ msgstr ""
 
 #: ../../../install.md:120
 msgid "训练启动"
-msgstr "Start Training"
+msgstr ""
 
 #: ../../../install.md:121
 #, fuzzy
@@ -194,11 +208,11 @@ msgstr "Installation"
 msgid ""
 "在搭载NPU的机器上安装环境的版本可参考GPU，在NPU上使用昇腾torch_npu代替torch，同时Flash-"
 "Attention和Apex不再支持安装，相应功能已由InternEvo代码内部实现。以下教程仅为torch_npu安装。"
-msgstr "For machines with NPU, the version of the installation environment can refer to that of GPU. Use Ascend's torch_npu instead of torch on NPU machines. Additionally, Flash-Attention and Apex are no longer supported for installation on NPU. The corresponding functionalities have been internally implemented in the InternEvo codebase. The following tutorial is only for installing torch_npu."
+msgstr ""
 
 #: ../../../install.md:129
 msgid "torch_npu官方文档：https://gitee.com/ascend/pytorch"
-msgstr "Official documentation for torch_npu: https://gitee.com/ascend/pytorch"
+msgstr ""
 
 #: ../../../install.md:131
 #, fuzzy
@@ -211,21 +225,21 @@ msgstr ""
 
 #: ../../../install.md:134
 msgid "NPU显卡：910B"
-msgstr "NPU card: 910B"
+msgstr ""
 
 #: ../../../install.md:137
 msgid "安装torch_run"
-msgstr "Installing torch_run"
+msgstr ""
 
 #: ../../../install.md:139
 msgid "参考文档：https://gitee.com/ascend/pytorch/tree/v2.1.0-6.0.rc1/"
-msgstr "Refer to the documentation: https://gitee.com/ascend/pytorch/tree/v2.1.0-6.0.rc1/"
+msgstr ""
 
 #: ../../../install.md:141
 msgid ""
 "安装时可尝试根据文档内方式安装，或者从 https://gitee.com/ascend/pytorch/releases "
 "下载指定版本torch_npu进行安装，如下所示："
-msgstr "You can try installing according to the methods in the documentation or download the specified version of torch_npu from https://gitee.com/ascend/pytorch/releases for installation, as shown below:"
+msgstr ""
 
 #~ msgid "CUDA >= 11.7"
 #~ msgstr ""
