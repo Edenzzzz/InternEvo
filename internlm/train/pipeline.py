@@ -144,10 +144,24 @@ def set_parallel_attr_for_param_groups(model: Union[nn.Module, nn.ModuleList]):
             for param in module.parameters():
                 setattr(param, IS_REPLICA_ZERO_PARALLEL, True)
 
+    def _check_module_hf(_, module):
+        if "RMSNorm" in str(module.__class__.__name__):
+            for param in module.parameters():
+                setattr(param, IS_REPLICA_ZERO_PARALLEL, True)
+        else:
+            for param in module.parameters():
+                if gpc.is_initialized(ParallelMode.WEIGHT) and is_using_isp():
+                    setattr(param, IS_WEIGHT_ZERO_PARALLEL, True)
+                elif gpc.is_initialized(ParallelMode.TENSOR) and not is_using_isp():
+                    setattr(param, IS_TENSOR_ZERO_PARALLEL, True)
+
     for _chunk in unwrap_naive_amp(model):
         # set param parallel attribute
         for name, module in _chunk.named_modules():
-            _check_module(name, module)
+            if gpc.config.model_type == "hf":
+                _check_module_hf(name, module)
+            else:
+                _check_module(name, module)
 
         for name, param in _chunk.named_parameters():
             assert (
@@ -524,7 +538,7 @@ def record_current_batch_training_metrics(
     train_state,
     optimizer,
     beta2_scheduler,
-    engine,
+    trainer,
     start_time,
     very_begining_time,
     loss,
@@ -546,10 +560,10 @@ def record_current_batch_training_metrics(
 
     if success_update and gpc.is_rank_for_log():
         lr = optimizer.param_groups[0]["lr"]
-        if hasattr(engine.optimizer, "grad_scaler"):
-            scaler = engine.optimizer.grad_scaler._scale.item()
-        elif hasattr(engine.optimizer.optim, "grad_scaler"):
-            scaler = engine.optimizer.optim.grad_scaler._scale.item()
+        if hasattr(trainer.engine.optimizer, "grad_scaler"):
+            scaler = trainer.engine.optimizer.grad_scaler._scale.item()
+        elif hasattr(trainer.engine.optimizer.optim, "grad_scaler"):
+            scaler = trainer.engine.optimizer.optim.grad_scaler._scale.item()
 
         num_tokens_in_batch = batch[1].nelement()
         real_num_tokens = math.ceil(acc_perplex.pop("real_token_num") / gpc.get_world_size(ParallelMode.GLOBAL))
