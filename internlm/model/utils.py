@@ -1,8 +1,8 @@
 from typing import Any, Dict, List
 
-from internlm.model.modules.mha import MHA
-from internlm.core.context import ParallelMode
 from internlm.core.context import global_context as gpc
+from internlm.model.modules.mha import MHA
+
 
 def internlm1_mha_pre_load_convert(
     model: MHA, state_dict: Dict, prefix: str, *args, **kwargs  # pylint: disable=W0613
@@ -52,6 +52,7 @@ def convert_attn_args_to_kwargs(args, kwargs) -> Dict[str, Any]:
         kwargs["max_seqlen"] = args[3]
 
     return kwargs
+
 
 def convert_hf_config(config):
     gpc.config.model.vocab_size = gpc.config.VOCAB_SIZE = config.vocab_size
