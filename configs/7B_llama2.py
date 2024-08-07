@@ -3,10 +3,10 @@ model_type = "LLAMA2"
 DO_ALERT = False
 
 VOCAB_SIZE = 32000
-SEQ_LEN = 2048
-HIDDEN_SIZE = 4096
+SEQ_LEN = 4096
+HIDDEN_SIZE = 2048
 NUM_ATTENTION_HEAD = 32
-NUM_KV_ATTENTION_HEAD = 32
+NUM_KV_ATTENTION_HEAD = 8
 MLP_RATIO = 2.6875
 NUM_LAYER = 32
 
@@ -53,6 +53,7 @@ data = dict(
     # defaults to 0, means disable evaluate
     valid_every=0,
     pack_sample_into_one=False,
+    use_packed_dataset=False,
     total_steps=20,
     skip_batches="",
     # rampup_batch_size (str): A string with three space-separated integers representing the
@@ -181,9 +182,15 @@ weight parallel (dict):
 """
 parallel = dict(
     zero1=dict(size=-1),
-    tensor=dict(size=1, mode="mtp"),
+    tensor=dict(size=2, mode="mtp"),
     pipeline=dict(size=1, interleaved_overlap=True),
     weight=dict(size=1, overlap=True, memory_pool=True),
+    sequence_parallel=True,
+    sequence_2D=dict(context_size=2,
+                     head_size=1,
+                     enable=True,
+                     window_size=2,
+                     device_placement_strategy=dict(head_first=True, interleaved=False)),
 )
 
 cudnn_deterministic = False

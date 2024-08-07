@@ -736,7 +736,6 @@ def _select_attn_op(op_type: AttnOpType) -> Tuple[AttnType, Callable]:
     attn_type = None
 
     enable_2D_sp = gpc.config.parallel.sequence_2D.enable
-
     if gpc.config.model.get("use_flash_attn", False):
         if device_backend == AcceleratorType.GPU and gpu_flash_attn_impl:
             if enable_2D_sp is True:

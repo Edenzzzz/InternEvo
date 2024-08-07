@@ -36,7 +36,6 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-
     # Initialize distributed environment
     initialize_distributed_env(config=args.config, launcher=args.launcher, master_port=args.port, seed=args.seed)
     assert hasattr(gpc, "config") and gpc.config is not None

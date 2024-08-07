@@ -191,7 +191,7 @@ def zigzag_double_ring_flash_attn_backward(
     assert causal is True, "zigzag ring is meaningless for causal=False"
 
     context_comm = RingComm(context_pg)
-    dkv_comm = RingComm(dkv_inter_window_pg)
+    dkv_comm = RingComm(intra_window_pg)
     kv_comm = RingComm(inter_window_pg)
     local_kv_comm = RingComm(intra_window_pg)
     local_dkv_comm = RingComm(dkv_intra_window_pg)
